@@ -1,0 +1,25 @@
+{
+  "name": "vghspider",
+  "version": "1.0.0",
+  "description": "crawler ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/david855033/vghspider.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/david855033/vghspider/issues"
+  },
+  "homepage": "https://github.com/david855033/vghspider#readme",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "querystring": "^0.2.0",
+    "request": "^2.83.0"
+  }
+}
