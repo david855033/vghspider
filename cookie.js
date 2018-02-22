@@ -27,10 +27,10 @@ var getCookieStringFromKeyValuePairs=function(keyValuePairs){
 }
 
 module.exports={
-    storeFromArray:function(cookieObj, inputArray){
+    storeFromArray:function(inputArray){
         //先轉換成K-V pair
         var inputObj = getKeyValuePairsFromCookieArray(inputArray);
-        var originObj = getKeyValuePairsFromCookieString(cookieObj.combinedString);
+        var originObj = getKeyValuePairsFromCookieString(this.cookieObj.combinedString);
         
         //將input的K-V pair更新到originObj(用來判斷新增/取代cookies)
         var keysInInputObj = Object.keys(inputObj);
@@ -38,10 +38,11 @@ module.exports={
         keysInInputObj.forEach(function(x){originObj[x]=inputObj[x]});
         
         //remove start with dt/WAS
-        keysInInputObj=keysInInputObj.filter(function(x){return x.slice(0,2)!='dt'&&x.slice(0,3)!='WAS'})
+        keysInInputObj = keysInInputObj.filter(function(x){return x.slice(0,2)!='dt'&&x.slice(0,3)!='WAS'})
         
         //轉換成string
         var combinedString = getCookieStringFromKeyValuePairs(originObj);
-        cookieObj.combinedString = combinedString;
-    }
+        this.cookieObj.combinedString = combinedString;
+    },
+    cookieObj:{}
 }

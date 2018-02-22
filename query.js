@@ -1,5 +1,13 @@
+Parser={};
+
 module.exports.queryToServerRequest=function(query)
 {
+    var result = getServerRequest(query);
+    result.query=query;
+    return result;
+}
+
+let getServerRequest = function(query){
     var queryList = query.split('_');
     if(queryList[0] == "patientList"){
         var form={wd:"0",histno:""};
@@ -152,5 +160,5 @@ module.exports.queryToServerRequest=function(query)
             url:"https://web9.vghtpe.gov.tw/NIS/report/FlowSheet/main.do?gaugeDate1="+queryList[3]+"&r_ser_num="+queryList[2]+"&r_his_id="+queryList[1],
             parser:Parser.flowSheet
         };
-    }
+    } 
 }
