@@ -1,6 +1,8 @@
 let util=require('util');
 let request=require("request");
+let query = require('./query.js').queryToServerRequest;
 let cookie = require('./cookie.js');
+let parser=require('./html-parser.js');
 module.exports={
     defaulOption:function(){
         this.url="https://web9.vghtpe.gov.tw/";
@@ -15,8 +17,10 @@ module.exports={
             "Accept-Language": "zh-TW,zh;q=0.8,en-US;q=0.6,en;q=0.4"
         }
     },
-    requestAsync:function(serverRequest){
+    requestAsync:function(q, passResult){
         return new Promise((resolve,reject)=>{
+                var serverRequest = query(q);
+                console.log("request action: " + serverRequest.query);
                 var option = new this.defaulOption();
                 option.headers={
                     'Cookie':  cookie.cookieObj.combinedString
@@ -29,7 +33,11 @@ module.exports={
              
                 request(option, function(error,response,body) {
                     cookie.storeFromArray(response.headers['set-cookie']);
-                    resolve(body);
+                    passResult||(passResult={});
+                    passResult.value=body;
+                    passResult.query=q;
+                    serverRequest.parser&&(passResult.parsed=parser[serverRequest.parser](body));
+                    resolve(passResult);
                 });     
 
                 // PostHTTPRequest(option, function(data,status,xhr){

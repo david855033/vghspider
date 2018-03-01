@@ -9,8 +9,7 @@ var promise = sign.signInAsync("DOC3924B","999999")
 .then(function(){
     console.log('sign in ok.');
 }).then(function(){
-    let dataContainer={}; 
-    return spider.doAsync(hisID, dataContainer);
+    return spider.doAsync(hisID);
 }).then(function(){
-    console.log('last');
+    console.log('End of Program.');
 });

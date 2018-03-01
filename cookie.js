@@ -1,6 +1,7 @@
 
 var getKeyValuePairsFromCookieArray=function(cookieArray){
     var keyValuePairs={};
+    cookieArray||(cookieArray=[]);
     cookieArray.forEach(function(item){
         var firstPart=item.split(';')[0];
         var split = firstPart.split('=');
