@@ -30,66 +30,66 @@ let getServerRequest = function(query){
     }else if(queryList[0]  == "patientData"){
         return {
             url:"https://web9.vghtpe.gov.tw/emr/qemr/qemr.cfm?action=findPba&histno="+queryList[1],
-            //parser:"getPatientData"
+            parser:"getPatientData"
         };
     }else if(queryList[0]  == "changeBedSection"){
         return {
             url:"https://web9.vghtpe.gov.tw/emr/qemr/qemr.cfm?action=findPlocs&histno="+queryList[1],
-            //parser:"getChangeBedSection"
+            parser:"getChangeBedSection"
         };
     }else if(queryList[0] =="consultation"){
         return {
             url:"https://web9.vghtpe.gov.tw/emr/cps/consultation.cfm?action=find",
             method:"POST",
             form:{cpscwd:'',cpsrsect:'',cpsdept:'',cpsdoc:'',cpshist:queryList[1],month:'',bgndt:'',enddt:''},
-            //parser:"getConsultation"
+            parser:"getConsultation"
         };
     }else if(queryList[0] =="consultationReply"){
         return {
             url:"https://web9.vghtpe.gov.tw/emr/cps/consultation.cfm?action=find&histno="+queryList[1]+"&caseno="+queryList[2]+"&oseq="+queryList[3],
-            //parser:"getConsultationReply"
+            parser:"getConsultationReply"
         };
     }else if(queryList[0] =="consultationPending"){
         return {
             url:"https://web9.vghtpe.gov.tw/emr/cps/consultation.cfm?action=add",
             method:"POST",
             form:{cpscwd:'',cpsrsect:'',cpsdept:'',cpsdoc:'',cpshist:queryList[1],cstype:"adm"},
-            //parser:"getConsultationPending"
+            parser:"getConsultationPending"
         };
     }else if(queryList[0] =="surgery"){
         return {
             url:"https://web9.vghtpe.gov.tw/emr/qemr/qemr.cfm?action=findOpn&histno="+queryList[1],
-            //parser:"getSurgery"
+            parser:"getSurgery"
         };
     }else if(queryList[0] =="order"){
         return {
             url:"https://web9.vghtpe.gov.tw/emr/qemr/qemr.cfm?action=findOrd&histno="+queryList[1]+"&tday="+queryList[2]+"&tdept=ALL",
-            //parser:"getOrder"
+            parser:"getOrder"
         };
     }else if(queryList[0] =="report"){
         return {
             url:"https://web9.vghtpe.gov.tw/emr/qemr/qemr.cfm?action=findRes&histno="+queryList[1]+"&tmonth="+queryList[2]+"&tdept=ALL",
-            //parser:"getReport"
+            parser:"getReport"
         };
     }else if(queryList[0] =="reportContent"){
         return {
             url:"https://web9.vghtpe.gov.tw/emr/qemr/qemr.cfm?action=findRes&partno="+queryList[2]+"&histno="+queryList[1]+"&caseno="+queryList[3]+"&ordseq="+queryList[4]+"&tmonth=03",
-            //parser:"getReportContent"
+            parser:"getReportContent"
         };
     }else if(queryList[0] =="cummulative"){
         return {
             url:"https://web9.vghtpe.gov.tw/emr/qemr/qemr.cfm?action=findResd&histno="+queryList[1]+"&resdtmonth="+queryList[2]+"&resdtype="+queryList[3],
-            //parser:"getCummulative"
+            parser:"getCummulative"
         };
     }else if(queryList[0] =="vitalSign"){
         return {
             url:"https://web9.vghtpe.gov.tw/emr/qemr/qemr.cfm?action=findVts&histno="+queryList[1]+"&caseno="+queryList[2]+"&pbvtype="+queryList[3],
-            //parser:"getVitalSign"
+            parser:"getVitalSign"
         };
     }else if(queryList[0] =="treatment"){
         return {
             url:"https://web9.vghtpe.gov.tw/emr/qemr/qemr.cfm?action=findTrt&histno="+queryList[1]+"&caseno="+queryList[2],
-            //parser:"getTreatment"
+            parser:"getTreatment"
         };
     }else if(queryList[0] =="transfusion"){
         return {

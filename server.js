@@ -1,7 +1,8 @@
-let util=require('util');
+
 let request=require("request");
 let query = require('./query.js').queryToServerRequest;
 let cookie = require('./cookie.js');
+let util = require('./my-util.js');
 let parser=require('./html-parser.js');
 module.exports={
     defaulOption:function(){
@@ -34,18 +35,11 @@ module.exports={
                 request(option, function(error,response,body) {
                     cookie.storeFromArray(response.headers['set-cookie']);
                     passResult||(passResult={});
-                    passResult.value=body;
+                    passResult.value=util.removeHtmlBlank(body);
                     passResult.query=q;
-                    serverRequest.parser&&(passResult.parsed=parser[serverRequest.parser](body));
+                    serverRequest.parser&&(passResult.parsed=parser[serverRequest.parser](passResult.value));
                     resolve(passResult);
                 });     
-
-                // PostHTTPRequest(option, function(data,status,xhr){
-                //     var resObj= JSON.parse(data);
-                //     setCookieString(cookieObj, resObj.cookieString);
-                //     console.log("recieve cookie: "+resObj.cookieString)
-                //     callback&&callback(resObj.body, Parser.getDateTime());
-                // });
         })
     }
 }
