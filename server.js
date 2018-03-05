@@ -35,7 +35,7 @@ module.exports={
                 request(option, function(error,response,body) {
                     cookie.storeFromArray(response.headers['set-cookie']);
                     passResult||(passResult={});
-                    passResult.value=util.removeHtmlBlank(body);
+                    passResult.value=body;
                     passResult.query=q;
                     serverRequest.parser&&(passResult.parsed=parser[serverRequest.parser](passResult.value));
                     resolve(passResult);

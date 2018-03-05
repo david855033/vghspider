@@ -13,6 +13,7 @@ module.exports = {
         return new Promise((resolve, reject) => {
 
             server.requestAsync("preSelectPatient" + "_" + hisID)
+                //住院清單
                 .then((passResult) => {
                     return FetchWriteAsync("admissionList" + "_" + hisID, hisID, passResult)
                 }).then((passResult) => {
@@ -20,86 +21,174 @@ module.exports = {
                     return new Promise((resolve) => { resolve(passResult) });
                 })
                 /*
-                        .then((passResult) => {
-                            return FetchWriteAsync("patientData" + "_" + hisID, hisID, passResult)
-                        })
-                        .then((passResult) => {
-                            return FetchWriteAsync("changeBedSection" + "_" + hisID, hisID, passResult)
-                        })
-                        .then((passResult) => {
-                            return FetchWriteAsync("consultation" + "_" + hisID, hisID, passResult)
-                        })
-                        .then((passResult) => {
-                            var consultList = passResult.saved;
-                            var reduced = consultList.reduce((promise, current) => {
-                                var query =  "consultationReply" + "_" + hisID + "_" + current.caseNo + "_" + current.oseq;
-                                return promise.then((passResult)=>{
-                                    return FetchWriteAsync(query, hisID, passResult);
-                                })
-                            }, Promise.resolve());
-                            return reduced;
-                            //return FetchWriteAsync("consultationReply" + "_" + hisID + "_" + caseno + "_" + oseq, hisID, result)
-                        })
-                        
-                        .then((passResult)=>{
-                            return FetchWriteAsync("consultationPending" + "_" + hisID, hisID, passResult);
-                        })
-                        .then((passResult) => {
-                            return FetchWriteAsync("surgery" + "_" + hisID, hisID, passResult);
-                        })
-                        .then((passResult) => {
-                            return FetchWriteAsync("order" + "_" + hisID + "_" + 3600, hisID, passResult);
-                        })
-                        .then((passResult) => {
-                            return FetchWriteAsync("report" + "_" + hisID + "_" + 96, hisID, passResult);
-                        })
-                        .then((passResult) => {
-                            var orderList = passResult.saved;
-                            var reduced = orderList.reduce((promise, current) => {
-                                var query =  "reportContent" + "_" + hisID + "_" + current.partNo + "_" + current.caseNo+"_" + current.orderSeq;
-                                return promise.then((passResult)=>{
-                                    return FetchWriteAsync(query, hisID, passResult);
-                                })
-                            }, Promise.resolve());
-                            return reduced;
-                            //return FetchWriteAsync("consultationReply" + "_" + hisID + "_" + caseno + "_" + oseq, hisID, result)
-                        })
-                        .then((passResult) => {
-                            var cummList = [];
-                            ['DGLU1'].forEach(x => {
-                                [24, 2016, 2015, 2014, 2013, 2012].forEach(y => {
-                                    cummList.push({ col: x, year: y });
-                                })
+                    //基本資料
+                    .then((passResult) => {
+                        return FetchWriteAsync("patientData" + "_" + hisID, hisID, passResult)
+                    })
+                    .then((passResult) => {
+                        return FetchWriteAsync("changeBedSection" + "_" + hisID, hisID, passResult)
+                    })
+                    .then((passResult) => {
+                        return FetchWriteAsync("consultation" + "_" + hisID, hisID, passResult)
+                    })
+                    .then((passResult) => {
+                        var consultList = passResult.saved;
+                        var reduced = consultList.reduce((promise, current) => {
+                            var query = "consultationReply" + "_" + hisID + "_" + current.caseNo + "_" + current.oseq;
+                            return promise.then((passResult) => {
+                                return FetchWriteAsync(query, hisID, passResult);
                             })
-                            var reduced = cummList.reduce((promise, current) => {
-                                var query = "cummulative" + "_" + hisID + "_" + current.year + "_" + current.col;
-                                return promise.then((passResult) => {
-                                    return FetchWriteAsync(query, hisID, passResult);
-                                })
-                            }, Promise.resolve());
-                            return reduced;
+                        }, Promise.resolve(passResult));
+                        return reduced;
+                    })
+    
+                    .then((passResult) => {
+                        return FetchWriteAsync("consultationPending" + "_" + hisID, hisID, passResult);
+                    })
+                    .then((passResult) => {
+                        return FetchWriteAsync("surgery" + "_" + hisID, hisID, passResult);
+                    })
+                    .then((passResult) => {
+                        return FetchWriteAsync("order" + "_" + hisID + "_" + 3600, hisID, passResult);
+                    })
+                    .then((passResult) => {
+                        return FetchWriteAsync("report" + "_" + hisID + "_" + 96, hisID, passResult);
+                    })
+                    .then((passResult) => {
+                        var orderList = passResult.saved;
+                        var reduced = orderList.reduce((promise, current) => {
+                            var query = "reportContent" + "_" + hisID + "_" + current.partNo + "_" + current.caseNo + "_" + current.orderSeq;
+                            return promise.then((passResult) => {
+                                return FetchWriteAsync(query, hisID, passResult);
+                            })
+                        }, Promise.resolve(passResult));
+                        return reduced;
+                    })
+                    .then((passResult) => {
+                        var cummList = [];
+                        ['DGLU1'].forEach(x => {
+                            [24, 2016, 2015, 2014, 2013, 2012].forEach(y => {
+                                cummList.push({ col: x, year: y });
+                            })
                         })
-                        .then((passResult) => {
-                            var vitalsignList = ['HWS','BPP','IO','TMP','RSP','OXY'];
-                            var reduced = vitalsignList.reduce((promise, current) => {
-                                var query = "vitalSign" + "_" + hisID + "_" + "all" + "_" + current;
-                                return promise.then((passResult) => {
-                                    return FetchWriteAsync(query, hisID, passResult);
-                                })
-                            }, Promise.resolve());
-                            return reduced;
-                        })
-                        */
+                        var reduced = cummList.reduce((promise, current) => {
+                            var query = "cummulative" + "_" + hisID + "_" + current.year + "_" + current.col;
+                            return promise.then((passResult) => {
+                                return FetchWriteAsync(query, hisID, passResult);
+                            })
+                        }, Promise.resolve(passResult));
+                        return reduced;
+                    })
+                    .then((passResult) => {
+                        var vitalsignList = ['HWS', 'BPP', 'IO', 'TMP', 'RSP', 'OXY'];
+                        var reduced = vitalsignList.reduce((promise, current) => {
+                            var query = "vitalSign" + "_" + hisID + "_" + "all" + "_" + current;
+                            return promise.then((passResult) => {
+                                return FetchWriteAsync(query, hisID, passResult);
+                            })
+                        }, Promise.resolve(passResult));
+                        return reduced;
+                    })
+                    .then((passResult) => {
+                        var admissionList = passResult.admissionList || [];
+                        var reduced = admissionList.reduce((promise, current) => {
+                            var query = "treatment" + "_" + hisID + "_" + current.caseNo;
+                            return promise.then((passResult) => {
+                                return FetchWriteAsync(query, hisID, passResult);
+                            })
+                        }, Promise.resolve(passResult));
+                        return reduced;
+                    })
+                    .then((passResult) => {
+                        var admissionList = passResult.admissionList || [];
+                        var reduced = admissionList.reduce((promise, current) => {
+                            var query = "transfusion" + "_" + hisID + "_" + current.caseNo;
+                            return promise.then((passResult) => {
+                                return FetchWriteAsync(query, hisID, passResult);
+                            })
+                        }, Promise.resolve(passResult));
+                        return reduced;
+                    })
+    
+                    .then((passResult) => {
+                        var admissionList = passResult.admissionList || [];
+                        var reduced = admissionList.reduce((promise, current) => {
+                            var query = "medication" + "_" + hisID + "_" + current.caseNo;
+                            return promise.then((passResult) => {
+                                return FetchWriteAsync(query, hisID, passResult);
+                            }).then((passResult) => {
+                                //儲存order Seq
+                                passResult.admissionListOdrseqMap = passResult.admissionListOdrseqMap || [];
+                                passResult.saved.filter(x => x.seq).map(x => x.seq).forEach(x => {
+                                    passResult.admissionListOdrseqMap.push({
+                                        caseNo: current.caseNo,
+                                        odrseq: x
+                                    });
+                                });
+                                return new Promise((resolve) => { resolve(passResult) });
+                            })
+                        }, Promise.resolve(passResult));
+                        return reduced;
+                    })
+                    .then((passResult) => {
+                        var odrseqMap = passResult.admissionListOdrseqMap || [];
+                        var reduced = odrseqMap.reduce((promise, current) => {
+                            var query = "medicationInfo" + "_" + current.caseNo + "_" + current.odrseq;
+                            return promise.then((passResult) => {
+                                return FetchWriteAsync(query, hisID, passResult);
+                            })
+                        }, Promise.resolve(passResult));
+                        return reduced;
+                    })
+                    .then((passResult) => {
+                        var admissionList = passResult.admissionList || [];
+                        var list = admissionList.filter(x => x.caseNo[0] != "G");
+                        var reduced = list.reduce((promise, current) => {
+                            var query = "admissionNote" + "_" + hisID + "_" + current.caseNo + "_" + current.admissionDate.replace(/-/g, '');
+                            return promise.then((passResult) => {
+                                return FetchWriteAsync(query, hisID, passResult);
+                            })
+                        }, Promise.resolve(passResult));
+                        return reduced;
+                    })
+                    .then((passResult) => {
+                        var admissionList = passResult.admissionList || [];
+                        var list = admissionList.filter(x => x.caseNo[0] != "G");
+                        var reduced = list.reduce((promise, current) => {
+                            var query = "dischargeNote" + "_" + hisID + "_" + current.caseNo + "_" + current.admissionDate.replace(/-/g, '');
+                            return promise.then((passResult) => {
+                                return FetchWriteAsync(query, hisID, passResult);
+                            })
+                        }, Promise.resolve(passResult));
+                        return reduced;
+                    })
+                    .then((passResult) => {
+                        var admissionList = passResult.admissionList || [];
+                        var list = admissionList.filter(x => x.caseNo[0] != "G");
+                        var reduced = list.reduce((promise, current) => {
+                            var query = "progressNote" + "_" + hisID + "_" + current.caseNo + "_" + current.admissionDate.replace(/-/g, '').slice(3, 6);
+                            return promise.then((passResult) => {
+                                return FetchWriteAsync(query, hisID, passResult);
+                            })
+                        }, Promise.resolve(passResult));
+                        return reduced;
+                    })
+                    */
                 .then((passResult) => {
-
                     var admissionList = passResult.admissionList || [];
-                    var reduced = admissionList.reduce((promise, current) => {
-                        var query ="treatment" + "_" + hisID + "_" + current.caseNo;
-                        return promise.then((passResult) => {
+                    var list = admissionList.filter(x => x.caseNo[0] != "G");
+                    if(list[0]){
+                        var query = "preSelectBirthSheet" + "_" + hisID + "_" + list[0].caseNo;
+                        return Promise.resolve(passResult).then((passResult) => {
                             return FetchWriteAsync(query, hisID, passResult);
+                        }).then((passResult) => {
+                            var saved = passResult.saved;
+                            var queryBirthSheet = "birthSheet" + "_" + saved.caseno + "_" + saved.histno + "_" + saved['struts.token.name'] + "_" + saved.token;
+                            return FetchWriteAsync(queryBirthSheet, hisID, passResult);
                         })
-                    }, Promise.resolve());
-                    return reduced;
+                    }else{
+                        return Promise.resolve(passResult);
+                    }
                 })
                 .then(() => {
                     resolve();
@@ -125,6 +214,10 @@ var FetchWriteAsync = function (qString, hisID, passResult) {
 //會寫入html及parsed之JSON檔案if there is one, 成功後呼叫resolve
 let writeToFile = function (hisID, passResult, resolve) {
     checkDir(hisID);
+    splitedQuery = passResult.query.split('_');
+    if (splitedQuery[0] == 'birthSheet') {
+        passResult.query = splitedQuery[0] + "_" + splitedQuery[1] + "_" + splitedQuery[2];
+    }
     var filepath = dataDir + "\\" + hisID + "\\" + passResult.query + ".html";
     var filepathParsed = dataDir + "\\" + hisID + "\\" + passResult.query + ".json";
 

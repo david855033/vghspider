@@ -1,6 +1,7 @@
 "use strict";
 let jsdom = require('jsdom');
 let util = require('./my-util.js');
+let $ = require("jquery");
 const { JSDOM } = jsdom;
 //--------轉換HTML--------
 //取得某病房的住院病人
@@ -395,7 +396,7 @@ module.exports.getTreatment = function (htmlText) {
             result.info = span[0].textContent.trim();
         }
        
-        result.item = tds[0].textContent.trim();
+        result.item = tds[0].textContent.replace(/(\(註記\).*)/g,"").trim();
         result.class = tds[1].textContent.trim();
         result.freq = tds[2].textContent.trim();
         result.qty = tds[3].textContent.trim();
@@ -411,8 +412,8 @@ module.exports.getTreatment = function (htmlText) {
 //[{item:"",req:"",date:""}]
 module.exports.getTransfusion = function (htmlText) {
     var resultArray = [];
-    var doc = util.getDOM(htmlText);
-    var tbodies = doc.getElementsByTagName('tbody');
+    const dom = new JSDOM(htmlText).window.document;
+    var tbodies = dom.getElementsByTagName('tbody');
     if (!tbodies) { return resultArray; }
     var tbody = tbodies[0];
     var trs = tbody.getElementsByTagName('tr');
@@ -433,8 +434,8 @@ module.exports.getTransfusion = function (htmlText) {
 //  {startDateTime:"",endDateTime:"",drugName:"",tradeName:"",dosage:"",unit:"",route:"",freq:"",status:"",info:""}
 module.exports.getMedication = function (htmlText) {
     var resultArray = [];
-    var doc = util.getDOM(htmlText);
-    var tbodies = doc.getElementsByTagName('tbody');
+    const dom = new JSDOM(htmlText).window.document;
+    var tbodies = dom.getElementsByTagName('tbody');
     if (!tbodies) { return resultArray; }
     var tbody = tbodies[0];
     var trs = tbody.getElementsByTagName('tr');
@@ -444,17 +445,17 @@ module.exports.getMedication = function (htmlText) {
         var tds = tr.getElementsByTagName('td');
         if (tds.length < 12) { continue; }
         var result = { drugName: "", tradeName: "", dosage: "", unit: "", route: "", freq: "", startDateTime: "", endDateTime: "", status: "", selfPaid: "", seq: "", info: "" };
-        result.drugName = tds[0].textContent.regreplace(/\\r/g, '').regreplace(/\\n/g, '').regreplace(/\\t/g, '').regreplace(/\\"/g, '').trim();
-        result.tradeName = tds[1].textContent.regreplace(/\\"/g, '').trim();
+        result.drugName = tds[0].textContent.replace(/(\\r|\\n|\\t|")/g, '').trim();
+        result.tradeName = tds[1].textContent.replace(/"/g, '').trim();
         result.dosage = tds[2].textContent.trim();
         result.unit = tds[3].textContent.trim();
         result.route = tds[4].textContent.trim();
         result.freq = tds[5].textContent.trim();
-        result.startDateTime = util.getDateTimeFromMedicationTable(tds[6].textContent.trim());
-        result.endDateTime = util.getDateTimeFromMedicationTable(tds[7].textContent.trim());
+        result.startDateTime = util.getDateTimeInMedicationTable(tds[6].textContent.trim());
+        result.endDateTime = util.getDateTimeInMedicationTable(tds[7].textContent.trim());
         result.status = tds[8].textContent.trim();
         result.selfPaid = tds[10].textContent.trim();
-        result.seq = tds[11].innerHTML.trim().regSelectAll(/ordseq=[0-9]*/).replace('ordseq=', '');
+        result.seq = tds[11].innerHTML.trim().selectToString(/ordseq=[0-9]*/).replace('ordseq=', '');
         result.info = tds[11].textContent.trim();
         resultArray.push(result);
     }
@@ -463,46 +464,91 @@ module.exports.getMedication = function (htmlText) {
 //取得藥物註記(字串)
 module.exports.getMedicationInfo = function (htmlText) {
     var result = "";
-    var doc = util.getDOM(htmlText);
-    var div = doc.getElementsByTagName('div');
+    const dom = new JSDOM(htmlText).window.document;
+    var div = dom.getElementsByTagName('div');
     div = div && div[0];
     if (!div) { return result; }
-    result = div.textContent.trim().replace('用藥說明:', '').regreplace(/\\r/g, '').regreplace(/\\n/g, '').regreplace(/\\t/g, '')
+    result = div.textContent.trim().replace('說明:', '').replace(/(\\r|\\n|\\t)/g, '').replace(/\s+/g,' ').trim();
+    return result;
+}
+//住院病摘(回傳string)
+module.exports.getAdmissionNote=function(htmlText){
+    var result="";
+    const dom = new JSDOM(htmlText).window.document;
+    var tbody = dom.getElementsByTagName('tbody');
+    if(!tbody){return result;}
+    var trs = tbody[0].getElementsByTagName('tr');
+    if(!trs) {return result;}
+    var tr = trs[1];
+    if (!tr) { return result; }
+    result = tr.textContent.replace(/(\r|\t)/g, '').trim();
+    return result;
+}
+//出院病摘(回傳string)
+module.exports.getDischargeNote=function(htmlText){
+    var result="";
+    const dom = new JSDOM(htmlText).window.document;
+    var tbody = dom.getElementsByTagName('tbody');
+    if(!tbody){return result;}
+    var trs = tbody[0].getElementsByTagName('tr');
+    if(!trs) {return result;}
+    var tr = trs[1];
+    if (!tr) { return result; }
+    result = tr.textContent.replace(/(\r|\t)/g, '').trim();
+    return result;
+}
+//病程紀錄(回傳string)
+module.exports.getProgressNote=function(htmlText){
+    var result="1";
+    const dom = new JSDOM(htmlText).window.document;
+    var tbody = dom.getElementsByTagName('tbody');
+    if(!tbody){return result;}
+    var trs = tbody[0].getElementsByTagName('tr');
+    if(!trs) {return result;}
+    for (var i = 0; i < trs.length; i++) {
+        var tr = trs[i];
+        if(!tr){continue;}
+        result += tr.textContent.replace(/(\r|\t)/g, '').trim()+" ";
+    }    
     return result;
 }
 //取得產單
 module.exports.getPreSelectBirthSheet = function (htmlText) {
     var result = { caseno: "", histno: "", token: "" };
     result['struts.token.name'] = "";
-    var doc = util.getDOM(htmlText);
-    var inputs = doc.getElementsByTagName('input');
+    const dom = new JSDOM(htmlText).window.document;
+    var inputs = dom.getElementsByTagName('input');
     if (!inputs || inputs.length < 4) { return result; }
-    result.caseno = inputs[0].getAttribute('value').regreplace(/\\/g, "").regreplace(/"/g, "");
-    result.histno = inputs[1].getAttribute('value').regreplace(/\\/g, "").regreplace(/"/g, "");
-    result['struts.token.name'] = inputs[2].getAttribute('value').regreplace(/\\/g, "").regreplace(/"/g, "");
-    result.token = inputs[3].getAttribute('value').regreplace(/\\/g, "").regreplace(/"/g, "");
+    result.caseno = inputs[0].getAttribute('value').replace(/(\\|")/g, "");
+    result.histno = inputs[1].getAttribute('value').replace(/(\\|")/g, "");
+    result['struts.token.name'] = inputs[2].getAttribute('value').replace(/(\\|")/g, "");
+    result.token = inputs[3].getAttribute('value').replace(/(\\|")/g, "");
     return result;
 }
 
 module.exports.getBirthSheet = function (htmlText) {
+    var isDOMChecked = function (jqObj, selector) {
+        var obj = jqObj.find(selector);
+        return obj[0] && obj[0].checked;
+    }
     var result = {
         hasBirthSheet: false,
-        mother: { ID: "", name: "", admissionReason: "" },
+        mother: { ID: "", name: "",age:"", admissionReason: "" },
         child: {
             GAweek: "", GAday: "", ROMDateTime: "", deliverDateTime: "", deliverMethod: ""
             , ApgarScore: [], management: []
         }
     };
-    htmlText = htmlText.regreplace(/\\t/g, '').regreplace(/\\n/g, '').regreplace(/\\r/g, '').regreplace(/\\"/g, '');
-    var doc = util.getDOM(htmlText);
-    var $doc = $(doc);
+    htmlText = htmlText.replace(/\s+/g, ' ');
+    var $doc = $(new JSDOM(htmlText).window);
 
     var $motherName = $doc.find('font>span');
     if (!$motherName) { return result; }
-    var nameText = $motherName.text().regSelectAll(/\[母親姓名:.*(?=\]\[)/).regreplace(/\[母親姓名:/, "").replaceNbsps();
+    var nameText = $motherName[0].textContent.replace(/(\[|母親姓名:|歲|\]|新生兒姓名:)/g,'').replace(/\s+/g,' ').trim();
     var parts = nameText.split(" ");
     if (parts.length < 3) { return result; }
     result.mother.ID = parts[1];
+    result.mother.age = parts[2];
     result.mother.name = parts[0];
     if (!result.mother.ID) { return result; }
     result.hasBirthSheet = true;
@@ -529,38 +575,35 @@ module.exports.getBirthSheet = function (htmlText) {
     if (isDOMChecked($doc, '#fillForm_nisNcInfo_del1')) {
         result.child.deliverMethod = "C/S";
     }
-
-    if (isDOMChecked($doc, '#ckListNisEmeTre-1[value="7"]')) {
+    var management = $doc.find('[name="ckListPedEmeTre"]');
+    if (isDOMChecked($doc, '[name="ckListPedEmeTre"][value="7"]')) {
         result.child.management.push("Dry and stimulate");
     }
-    if (isDOMChecked($doc, '#ckListNisEmeTre-1[value="3"]')) {
+    if (isDOMChecked($doc, '[name="ckListPedEmeTre"][value="3"]')) {
         result.child.management.push("Suction");
     }
-    if (isDOMChecked($doc, '#ckListNisEmeTre-1[value="2"]')) {
+    if (isDOMChecked($doc, '[name="ckListPedEmeTre"][value="2"]')) {
         result.child.management.push("Oxygen");
     }
-    if (isDOMChecked($doc, '#ckListNisEmeTre-1[value="0"]')) {
+    if (isDOMChecked($doc, '[name="ckListPedEmeTre"][value="0"]')) {
         result.child.management.push("PPV");
     }
-    if (isDOMChecked($doc, '#ckListNisEmeTre-1[value="1"]')) {
+    if (isDOMChecked($doc, '[name="ckListPedEmeTre"][value="1"]')) {
         result.child.management.push("Intubation");
     }
-    if (isDOMChecked($doc, '#ckListNisEmeTre-1[value="5"]')) {
+    if (isDOMChecked($doc, '[name="ckListPedEmeTre"][value="5"]')) {
         result.child.management.push("Cardiac Massage");
     }
-    if (isDOMChecked($doc, '#ckListNisEmeTre-1[value="6"]')) {
+    if (isDOMChecked($doc, '[name="ckListPedEmeTre"][value="6"]')) {
         result.child.management.push("Medication");
     }
-    if (isDOMChecked($doc, '#ckListNisEmeTre-1[value="4"]')) {
+    if (isDOMChecked($doc, '[name="ckListPedEmeTre"][value="4"]')) {
         result.child.management.push("Other");
     }
 
     return result;
 }
-var isDOMChecked = function (jqObj, selector) {
-    var obj = jqObj.find(selector);
-    return obj[0] && obj[0].checked;
-}
+
 
 
 //護理交班

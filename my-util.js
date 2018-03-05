@@ -21,9 +21,6 @@ if (!String.prototype.splice) {
 
 module.exports =
     {
-        removeHtmlBlank: function (htmlText) {
-            return htmlText.replaceNbsps().replace(/(\\r|\\n|\\t|\\|&nbsp;)/g, '').trim();
-        },
         //'20180101' -> '2018-01-01'
         getDateFromShortDate: function (dateString) {
             if (typeof dateString == "string" && dateString.length == 8) {
@@ -53,6 +50,11 @@ module.exports =
                 return parts[0] + ' ' + parts[1];
             }
             return dateTimeString;
+        },
+        // '2018-01-01-10.30' -> '2018-01-01 10:30'
+        getDateTimeInMedicationTable:function(inputString)
+        {
+            return inputString.selectToString(/[0-9]{4}-[0-9]{2}-[0-9]{2}/)+" "+inputString.selectToString(/[0-9]{2}\.[0-9]{2}/).replace('\.',":");
         },
         //轉成date格式
         getDateFromString: function (str) {
