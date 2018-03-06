@@ -300,7 +300,7 @@ module.exports.getReportContent = function (htmlText) {
     var pre = dom.getElementsByTagName('pre');
     if (!pre) { return result; }
     pre = pre[0];
-    result = pre.textContent.trim();
+    result = pre.textContent.replace(/\s+/g,' ').trim();
     return result;
 };
 //查詢累積報告
@@ -334,7 +334,8 @@ module.exports.getCummulative = function (htmlText) {
         }
         newDataRow[0] = newDataRow[0].replace(/\./g, ":");
         newDataRow[0] = util.getDateFromString(newDataRow[0]).toLocaleString();
-        result.data.push(newDataRow);
+        
+        if(!newDataRow[0].match(/invalid/i)){result.data.push(newDataRow);}
     }
     return result;
 }
@@ -485,6 +486,21 @@ module.exports.getAdmissionNote=function(htmlText){
     result = tr.textContent.replace(/(\r|\t)/g, '').trim();
     return result;
 }
+//急診病摘(回傳string)
+module.exports.getERNote=function(htmlText){
+    var result="";
+    const dom = new JSDOM(htmlText).window.document;
+    var tbody = dom.getElementsByTagName('tbody');
+    if(!tbody){return result;}
+    var trs = tbody[0].getElementsByTagName('tr');
+    if(!trs) {return result;}
+    for (var i = 0; i < trs.length; i++) {
+        var tr = trs[i];
+        if(!tr){continue;}
+        result += tr.textContent.replace(/(\r|\t)/g, '').trim()+" ";
+    }    
+    return result;
+}
 //出院病摘(回傳string)
 module.exports.getDischargeNote=function(htmlText){
     var result="";
@@ -500,7 +516,7 @@ module.exports.getDischargeNote=function(htmlText){
 }
 //病程紀錄(回傳string)
 module.exports.getProgressNote=function(htmlText){
-    var result="1";
+    var result="";
     const dom = new JSDOM(htmlText).window.document;
     var tbody = dom.getElementsByTagName('tbody');
     if(!tbody){return result;}

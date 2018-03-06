@@ -4,6 +4,7 @@ let query = require('./query.js').queryToServerRequest;
 let cookie = require('./cookie.js');
 let util = require('./my-util.js');
 let parser=require('./html-parser.js');
+let gs=require('./global-setting.js');
 module.exports={
     defaulOption:function(){
         this.url="https://web9.vghtpe.gov.tw/";

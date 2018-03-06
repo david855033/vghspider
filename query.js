@@ -120,7 +120,13 @@ let getServerRequest = function (query) {
             url: "https://web9.vghtpe.gov.tw/emr/qemr/qemr.cfm?action=findPrg&histno=" + queryList[1] + "&caseno=" + queryList[2] + "&prgpart=" + queryList[3],
             parser: "getProgressNote"
         };
-    }else if (queryList[0] == "preSelectBirthSheet") {
+    }else if (queryList[0] == "erNote") {
+        return {
+            url: "https://web9.vghtpe.gov.tw/emr/qemr/qemr.cfm?action=findErn&histno=" + queryList[1] + "&caseno=" + queryList[2],
+            parser: "getERNote"
+        };
+    }
+    else if (queryList[0] == "preSelectBirthSheet") {
         return {
             url: "https://web9.vghtpe.gov.tw/OBSTS/nurlist?caseno=" + queryList[2] + "&histno=" + queryList[1],
             parser:"getPreSelectBirthSheet"
