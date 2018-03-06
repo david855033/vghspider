@@ -172,7 +172,7 @@ let getServerRequest = function (query) {
     } else if (queryList[0] == "flowSheet") {
         return {
             url: "https://web9.vghtpe.gov.tw/NIS/report/FlowSheet/main.do?gaugeDate1=" + queryList[3] + "&r_ser_num=" + queryList[2] + "&r_his_id=" + queryList[1],
-            //parser:"flowSheet"
+            parser:"flowSheet"
         };
     }
 }

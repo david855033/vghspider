@@ -1,9 +1,8 @@
-let util = require('util');
 let fs = require("fs");
 let server = require('./server.js');
 let cookie = require("./cookie.js")
 let parser = require("./html-parser.js");
-
+let util = require('./my-util');
 let dataDir = "D:\\spiderdata";
 
 
@@ -173,22 +172,52 @@ module.exports = {
                         }, Promise.resolve(passResult));
                         return reduced;
                     })
-                    */
+                    .then((passResult) => {
+                        var admissionList = passResult.admissionList || [];
+                        var list = admissionList.filter(x => x.caseNo[0] != "G");
+                        if(list[0]){
+                            var query = "preSelectBirthSheet" + "_" + hisID + "_" + list[0].caseNo;
+                            return Promise.resolve(passResult).then((passResult) => {
+                                return FetchWriteAsync(query, hisID, passResult);
+                            }).then((passResult) => {
+                                var saved = passResult.saved;
+                                var queryBirthSheet = "birthSheet" + "_" + saved.caseno + "_" + saved.histno + "_" + saved['struts.token.name'] + "_" + saved.token;
+                                return FetchWriteAsync(queryBirthSheet, hisID, passResult);
+                            })
+                        }else{
+                            return Promise.resolve(passResult);
+                        }
+                    })
+                */
                 .then((passResult) => {
                     var admissionList = passResult.admissionList || [];
-                    var list = admissionList.filter(x => x.caseNo[0] != "G");
-                    if(list[0]){
-                        var query = "preSelectBirthSheet" + "_" + hisID + "_" + list[0].caseNo;
-                        return Promise.resolve(passResult).then((passResult) => {
+                    var list = admissionList.filter(x => x.caseNo != "G");
+
+                    //住院迴圈
+                    var reduced = list.reduce((promise, current) => {
+                        var query = "preSelectFlowSheet" + "_" + hisID + "_" + current.caseNo;
+
+                        return promise.then((passResult) => {
                             return FetchWriteAsync(query, hisID, passResult);
                         }).then((passResult) => {
-                            var saved = passResult.saved;
-                            var queryBirthSheet = "birthSheet" + "_" + saved.caseno + "_" + saved.histno + "_" + saved['struts.token.name'] + "_" + saved.token;
-                            return FetchWriteAsync(queryBirthSheet, hisID, passResult);
+                            //依照日期產生queryList
+                            var startDate = new Date(current.admissionDate);
+                            var endDate = current.dischargeDate ? new Date(current.dischargeDate) : new Date(new Date().yyyymmdd('-'));
+                            var queryList = [];
+                            for (var i = startDate; i <= endDate; i.addDate(1)) {
+                                queryList.push("flowSheet" + "_" + + hisID + "_" + current.caseNo + "_" + i.yyyymmdd());
+                            }
+                            //日期回圈
+                            var reduceDateQuery = queryList.reduce((promiseDate, currentDateQuery) => {
+                                return promiseDate.then((passResult) => {
+                                    return FetchWriteAsync(currentDateQuery, hisID, passResult);
+                                })
+                            }, Promise.resolve(passResult))
+                            return reduceDateQuery;
                         })
-                    }else{
-                        return Promise.resolve(passResult);
-                    }
+
+                    }, Promise.resolve(passResult));
+                    return reduced;
                 })
                 .then(() => {
                     resolve();
@@ -217,21 +246,30 @@ let writeToFile = function (hisID, passResult, resolve) {
     splitedQuery = passResult.query.split('_');
     if (splitedQuery[0] == 'birthSheet') {
         passResult.query = splitedQuery[0] + "_" + splitedQuery[1] + "_" + splitedQuery[2];
+    } else if (splitedQuery[0] == 'preSelectBirthSheet' || splitedQuery[0] == 'preSelectFlowSheet') {
+        passResult.saved = passResult.parsed;
+        passResult.parsed = {};
+        resolve(passResult);
+        return;
     }
+    var queryToRecord = passResult.query;
     var filepath = dataDir + "\\" + hisID + "\\" + passResult.query + ".html";
     var filepathParsed = dataDir + "\\" + hisID + "\\" + passResult.query + ".json";
-
-    var content = "[fetch time:" + new Date().getShortDateTime() + "]\r\n" + passResult.value;
+    var logPath= dataDir + "\\" + hisID + "\\" + "__log" + ".txt";
+    var fetchDateTimeRecord ="[" + new Date().getShortDateTime() + "]";
+    var content = fetchDateTimeRecord+ "\r\n" + passResult.value;
     fs.writeFile(filepath, content, function (err) {
         if (err) { console.log(err); }
         console.log(" >> write to file: " + filepath);
         passResult.value = "";
         passResult.query = "";
         if (passResult.parsed) {
+            passResult.parsed.lastUpdate = new Date().getShortDateTime();
             parsedContent = JSON.stringify(passResult.parsed);
             fs.writeFile(filepathParsed, parsedContent, function (err) {
                 console.log(" >> parse to file: " + filepathParsed);
                 passResult.saved = passResult.parsed;
+                fs.appendFileSync(logPath, fetchDateTimeRecord + " " + queryToRecord+ "\r\n");
                 passResult.parsed = {};
                 resolve(passResult);
             })

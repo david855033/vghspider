@@ -18,7 +18,20 @@ if (!String.prototype.splice) {
         return this.slice(0, start) + newSubStr + this.slice(start + Math.abs(delCount));
     };
 }
-
+Date.prototype.yyyymmdd = function(spliter) {
+    var mm = this.getMonth() + 1; // getMonth() is zero-based
+    var dd = this.getDate();
+    spliter=spliter||'';
+    return [this.getFullYear(),
+            (mm>9 ? '' : '0') + mm,
+            (dd>9 ? '' : '0') + dd
+           ].join(spliter);
+  };
+  
+Date.prototype.addDate = function (increment){
+    this.setDate(this.getDate() + increment);
+};
+  
 module.exports =
     {
         //'20180101' -> '2018-01-01'
@@ -70,5 +83,5 @@ module.exports =
                 t[0] = t[0] || 0; t[1] = t[1] || 0; t[2] = t[2] || 0;
                 return new Date(d[0], (d[1] - 1), d[2], t[0], t[1], t[2]);
             };
-        },
+        }
     }

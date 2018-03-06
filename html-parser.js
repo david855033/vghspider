@@ -5,7 +5,7 @@ let $ = require("jquery");
 const { JSDOM } = jsdom;
 //--------轉換HTML--------
 //取得某病房的住院病人
-//[{bed:"NICU-1",name:"",patientID:"1234567",gender:"",section:"",admissionDate:""}]
+//[{bed:"NICU-1",name:"",patientID:"1234567",gender:"",section:"",admissionDate:"",dischargeDate:""}]
 
 module.exports.getPatientList = function (htmlText) {
     var resultArray = [];
@@ -35,6 +35,7 @@ module.exports.getPatientList = function (htmlText) {
                 result.gender = tds[4].textContent;
                 result.section = tds[5].textContent.trim();
                 result.admissionDate = util.getDateFromShortDate(tds[7].textContent.trim());
+                result.dischargeDate = util.getDateFromShortDate(tds[8].textContent.trim());
                 resultArray.push(result);
             }
         }
@@ -543,7 +544,7 @@ module.exports.getBirthSheet = function (htmlText) {
     var $doc = $(new JSDOM(htmlText).window);
 
     var $motherName = $doc.find('font>span');
-    if (!$motherName) { return result; }
+    if ($motherName.length==0) { return result; }
     var nameText = $motherName[0].textContent.replace(/(\[|母親姓名:|歲|\]|新生兒姓名:)/g,'').replace(/\s+/g,' ').trim();
     var parts = nameText.split(" ");
     if (parts.length < 3) { return result; }
@@ -721,14 +722,14 @@ module.exports.flowSheet = function (htmlText) {
     var getProperty = function (name) {
         var match = htmlText.match(new RegExp(name + "(\\s|\\S)*?<\\/script>"));
         if (match) {
-            match = match[0].regreplace(/<\/script>/g, "").regreplace(new RegExp(name + "="), "").regreplace(/\\/g, "");
+            match = match[0].replace(/<\/script>/g, "").replace(new RegExp(name + "="), "").replace(/\\/g, "");
             do {
-                var fix = match.regreplace(/\,\,/g, ",\"\",");
+                var fix = match.replace(/\,\,/g, ",\"\",");
                 var fixed = (fix != match);
                 match = fix;
             } while (fixed);
-            match = match.regreplace(/\,\]/g, ",\"\"]");
-            match = match.regreplace(/\[\,/g, "[\"\",");
+            match = match.replace(/\,\]/g, ",\"\"]");
+            match = match.replace(/\[\,/g, "[\"\",");
             if (match[match.length - 1] == ";") { match = match.slice(0, match.length - 1) }
             return JSON.parse(match);
         }
