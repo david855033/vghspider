@@ -4,10 +4,21 @@ let sign = require("./sign.js")
 let spider = require("./spider.js");
 let gs = require('./global-setting.js');
 let hisIDList = ['44572001'].map(x => x.trim());
+let util = require('./my-util.js');
+
+gs.checkDir();
 
 //---control zone---
-    //download(hisIDList) ;
-    createPatient(hisIDList);
+Promise.resolve()
+    // .then(()=>{
+    //     return download(hisIDList);
+    // })
+    .then(() => {
+        return createPatient(hisIDList);
+    })
+    .then(function () {
+        console.log('End of Program.');
+    });
 ///------
 function createPatient(hisIDList) {
     return hisIDList.reduce((promise, current) => {
@@ -24,7 +35,7 @@ function createPatient(hisIDList) {
                 var dataStructure = file.replace("_" + current, '').replace('.json', '');
                 var splitted = dataStructure.split('_');
                 var dataType = splitted[0];
-                if (dataType == "admissionNote" || dataType == "dischargeNote"|| dataType == "erNote"|| dataType == "progressNote") {
+                if (dataType == "admissionNote" || dataType == "dischargeNote" || dataType == "erNote" || dataType == "progressNote") {
                     newPatient[dataType] || (newPatient[dataType] = []);
                     newPatient[dataType].push({
                         caseno: splitted[1],
@@ -54,15 +65,30 @@ function createPatient(hisIDList) {
                     })
                 } else if (dataType == "flowSheet") {
                     newPatient[dataType] || (newPatient[dataType] = []);
-                    var container = newPatient[dataType].filter(x=>x.caseno==splitted[1]);
-                    if(container){container=container[0]}else{container={caseno:splitted[1]}}
-                    var lastUpdate=content.lastUpdate;
-                    delete content[lastUpdate];
-                    container.push({
-                        date: splitted[2],
-                        content: content,
-                        lastUpdate: lastUpdate
-                    })
+                    var container = newPatient[dataType].filter(x => x.caseno == splitted[1]);
+                    if (container.length > 0) {
+                        container = container[0]
+                    } else {
+                        container = { caseno: splitted[1], dates: [] }
+                        newPatient[dataType].push(container);
+                    }
+                    var lastUpdate = content.lastUpdate;
+                    delete content['lastUpdate'];
+                    container.dates.push(
+                        {
+                            dates: util.getDateFromShortDate(splitted[2]),
+                            lastUpdate: lastUpdate,
+                            content: content
+                        }
+                    )
+                } else if (dataType == "medication") {
+                    newPatient[dataType] || (newPatient[dataType] = []);
+                    content.caseno=splitted[1];
+                    newPatient[dataType].push(content);
+                } else if (dataType == "medicationInfo") {
+                    newPatient[dataType] || (newPatient[dataType] = []);
+                    content.caseno=splitted[1];
+                    newPatient[dataType].push(content);
                 } else {
                     newPatient[dataStructure] = content;
                 }
@@ -83,8 +109,7 @@ function download(hisIDList) {
                         return spider.doAsync(current);
                     });
                 }, Promise.resolve());
-            }).then(function () {
-                console.log('End of Program.');
             }).then(() => { resolve() })
     });
 }
+
