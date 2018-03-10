@@ -9,7 +9,7 @@ let patient = require('./patient.js');
 
 gs.checkDir();
 
-//---control zone---
+//---genrate patient list---
 let hisIDList = [];
 
 if (!fs.existsSync(gs.commonDir + "\\unique-patient-list.json")) {
@@ -33,7 +33,7 @@ hisIDList.forEach((element) => {
 });
 
 
-//-----
+//-----download & parse
 Promise.resolve()
     .then(() => {
         var reduced = todoList.reduce((promise, current) => {
