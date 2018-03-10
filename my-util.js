@@ -18,20 +18,36 @@ if (!String.prototype.splice) {
         return this.slice(0, start) + newSubStr + this.slice(start + Math.abs(delCount));
     };
 }
-Date.prototype.yyyymmdd = function(spliter) {
+Date.prototype.yyyymmdd = function (spliter) {
     var mm = this.getMonth() + 1; // getMonth() is zero-based
     var dd = this.getDate();
-    spliter=spliter||'';
+    spliter = spliter || '';
     return [this.getFullYear(),
-            (mm>9 ? '' : '0') + mm,
-            (dd>9 ? '' : '0') + dd
-           ].join(spliter);
-  };
-  
-Date.prototype.addDate = function (increment){
+    (mm > 9 ? '' : '0') + mm,
+    (dd > 9 ? '' : '0') + dd
+    ].join(spliter);
+};
+
+Date.prototype.yyyymmddhhmmss = function () {
+    var MM = this.getMonth() + 1; // getMonth() is zero-based
+    var dd = this.getDate();
+
+    var date = [this.getFullYear(),
+    (MM > 9 ? '' : '0') + MM,
+    (dd > 9 ? '' : '0') + dd].join('');
+    
+    var hh = this.getHours(); 
+    var mm = this.getMinutes();
+    var ss = this.getSeconds();
+
+    var time = [(hh > 9 ? '' : '0') + hh,(mm > 9 ? '' : '0') + mm,(ss > 9 ? '' : '0') + ss].join('');
+    return date+"_"+time;
+};
+
+Date.prototype.addDate = function (increment) {
     this.setDate(this.getDate() + increment);
 };
-  
+
 module.exports =
     {
         //'20180101' -> '2018-01-01'
@@ -65,9 +81,8 @@ module.exports =
             return dateTimeString;
         },
         // '2018-01-01-10.30' -> '2018-01-01 10:30'
-        getDateTimeInMedicationTable:function(inputString)
-        {
-            return inputString.selectToString(/[0-9]{4}-[0-9]{2}-[0-9]{2}/)+" "+inputString.selectToString(/[0-9]{2}\.[0-9]{2}/).replace('\.',":");
+        getDateTimeInMedicationTable: function (inputString) {
+            return inputString.selectToString(/[0-9]{4}-[0-9]{2}-[0-9]{2}/) + " " + inputString.selectToString(/[0-9]{2}\.[0-9]{2}/).replace('\.', ":");
         },
         //轉成date格式
         getDateFromString: function (str) {

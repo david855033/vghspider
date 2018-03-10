@@ -8,7 +8,7 @@ module.exports = {
             return promise.then(() => {
                 console.log('generate patient from raw data: ' + current);
                 var patientRawDataPath = gs.rawDataDir + "\\" + current;
-                var patientDataPath = gs.patientDataDir + "\\" + current + '.json';
+                var patientDataPath = gs.patientDataDir + "\\" + current +"_"+new Date().yyyymmddhhmmss()+ '.json';
                 var newPatient = {};
                 var files = fs.readdirSync(patientRawDataPath).filter(x => x.match(/\.json$/));
 

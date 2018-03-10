@@ -736,9 +736,9 @@ module.exports.NISHandOverNote = function (htmlText) {
 //flowSheet
 module.exports.flowSheet = function (htmlText) {
     var getProperty = function (name) {
-        var match = htmlText.match(new RegExp(name + "(\\s|\\S)*?<\\/script>"));
+        var match = htmlText.match(new RegExp("var "+name + "(\\s|\\S)*?<\\/script>"));
         if (match) {
-            match = match[0].replace(/<\/script>/g, "").replace(new RegExp(name + "="), "").replace(/\\/g, "");
+            match = match[0].replace(/<\/script>/g, "").replace(new RegExp("var "+name + "="), "").replace(/\\/g, "");
             do {
                 var fix = match.replace(/\,\,/g, ",\"\",");
                 var fixed = (fix != match);
