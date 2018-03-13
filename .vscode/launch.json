@@ -10,8 +10,8 @@
             "request": "launch",
             "name": "Launch Program",
             "console": "integratedTerminal",
-            "program": "${workspaceFolder}\\run.js",
-            //"program": "${workspaceFolder}\\etl\\etl3.js",
+            // "program": "${workspaceFolder}\\run.js",
+            "program": "${workspaceFolder}\\etl\\etl3.js",
         }
     ]
 }

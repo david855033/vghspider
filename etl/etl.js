@@ -1,8 +1,11 @@
 let fs = require('fs');
 let util = require('..//my-util.js');
 
-let patientDir = "G:\\patient_data";
-let workspaceDir = "G:\\workspace";
+// let patientDir = "G:\\patient_data";
+// let workspaceDir = "G:\\workspace";
+let patientDir = "D:\\spider\\patient_data";
+let workspaceDir = "D:\\spider\\workspace";
+
 
 console.log("run ETL");
 console.log(">>patientDir: " + patientDir);
@@ -26,7 +29,7 @@ for (let i = 0; i < patientFiles.length; i++) {   // should be patientFiles.leng
     process.stdout.write('\r>>load file: ' + i + "  ");
 }
 console.log("");
-console.log(">>write to single patient file to work space...");
+console.log(">>write to single patient file by year to work space...");
 
 
 for (let i = 2012; i <= 2017; i++) {

@@ -98,5 +98,13 @@ module.exports =
                 t[0] = t[0] || 0; t[1] = t[1] || 0; t[2] = t[2] || 0;
                 return new Date(d[0], (d[1] - 1), d[2], t[0], t[1], t[2]);
             };
+        },
+        //計算日期差距
+        getDateDifference: function(date1,date2){
+            var date1 = new Date(date1);
+            var date2 = new Date(date2);
+            var timeDiff = Math.abs(date2.getTime() - date1.getTime());
+            var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)); 
+            return diffDays;
         }
     }

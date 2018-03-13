@@ -1,10 +1,12 @@
 let fs = require('fs');
 let util = require('..//my-util.js');
 
-let patientDir = "G:\\patient_data";
-let workspaceDir = "G:\\workspace";
+// let patientDir = "G:\\patient_data";
+// let workspaceDir = "G:\\workspace";
+let patientDir = "D:\\spider\\patient_data";
+let workspaceDir = "D:\\spider\\workspace";
 
-let years = [2012, 2013, 2014, 2015, 2016, 2017];
+let years = [2013, 2014, 2015, 2016, 2017];
 
 //抓取曾經住過BR83的人(section=nb)
 
@@ -18,5 +20,5 @@ years.forEach(year => {
     });
 
     console.log(">>> matched count = "+ patientAdmittToBR.length);
-    fs.writeFileSync(workspaceDir+"\\patient-data-set-nb-"+year+".json",JSON.stringify(patientAdmittToBR));
+    fs.writeFileSync(workspaceDir+"\\patient-data-set-br83"+year+".json",JSON.stringify(patientAdmittToBR));
 });
