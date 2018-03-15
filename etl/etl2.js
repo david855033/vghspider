@@ -1,10 +1,11 @@
 let fs = require('fs');
 let util = require('..//my-util.js');
 
-let patientDir = "G:\\patient_data";
-let workspaceDir = "G:\\workspace";
+// let patientDir = "G:\\patient_data";
+// let workspaceDir = "G:\\workspace";
 // let patientDir = "D:\\spider\\patient_data";
 // let workspaceDir = "D:\\spider\\workspace";
+let patientDir = "D:\\spider\\patient_data"; let workspaceDir = "D:\\spider\\workspace";
 
 let years = [2013, 2014, 2015, 2016, 2017];
 
