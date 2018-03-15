@@ -48,12 +48,34 @@ module.exports = {
                     return FetchWriteAsync("order" + "_" + hisID + "_" + 3600, hisID, passResult);
                 })
                 .then((passResult) => {
-                    return FetchWriteAsync("report" + "_" + hisID + "_" + 96, hisID, passResult);
+                    var years = [24, 2017, 2016, 2015, 2014, 2013, 2012];
+                    var reduced = years.reduce((promise, current) => {
+                        return promise.then((passResult)=>{
+                            return FetchWriteAsync("report" + "_" + hisID + "_" + current, hisID, passResult)
+                        })
+                        .then((passResult)=>{
+                            return new Promise((resolve)=>{
+                                passResult.report=passResult.report||[];
+                                passResult.report.push({year:current,array:passResult.saved.array});
+                                resolve(passResult);
+                            })
+                        });
+                    }, Promise.resolve(passResult));
+                    return reduced;
                 })
                 .then((passResult) => {
-                    var orderList = passResult.saved.array;
+                    var orderList = [];
+                    passResult.report=passResult.report||[];
+                    passResult.report.forEach(reportOfYear=>{
+                        (reportOfYear.array||[]).forEach(x=>{
+                            if(!orderList.find(y=>y.orderSeq==x.orderSeq&&y.caseNo==x.caseNo)){
+                                x.tmonth=reportOfYear.year;
+                                orderList.push(x)
+                            }
+                        });
+                    })
                     var reduced = orderList.reduce((promise, current) => {
-                        var query = "reportContent" + "_" + hisID + "_" + current.partNo + "_" + current.caseNo + "_" + current.orderSeq;
+                        var query = "reportContent" + "_" + hisID + "_" + current.partNo + "_" + current.caseNo + "_" + current.orderSeq+"_"+current.tmonth;
                         return promise.then((passResult) => {
                             return FetchWriteAsync(query, hisID, passResult);
                         })
@@ -268,12 +290,12 @@ let writeToFile = function (hisID, passResult, resolve) {
         console.log(" >> write to file: " + filepath);
         passResult.value = "";
         passResult.query = "";
-        
+
         //--標準化parse物件
-        if(typeof passResult.parsed=="string"){
-            passResult.parsed={value:passResult.parsed}
-        }else if(Array.isArray(passResult.parsed)){
-            passResult.parsed={array:passResult.parsed}
+        if (typeof passResult.parsed == "string") {
+            passResult.parsed = { value: passResult.parsed }
+        } else if (Array.isArray(passResult.parsed)) {
+            passResult.parsed = { array: passResult.parsed }
         }
 
         if (passResult.parsed) {

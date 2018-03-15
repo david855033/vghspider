@@ -72,7 +72,7 @@ let getServerRequest = function (query) {
         };
     } else if (queryList[0] == "reportContent") {
         return {
-            url: "https://web9.vghtpe.gov.tw/emr/qemr/qemr.cfm?action=findRes&partno=" + queryList[2] + "&histno=" + queryList[1] + "&caseno=" + queryList[3] + "&ordseq=" + queryList[4] + "&tmonth=03",
+            url: "https://web9.vghtpe.gov.tw/emr/qemr/qemr.cfm?action=findRes&partno=" + queryList[2] + "&histno=" + queryList[1] + "&caseno=" + queryList[3] + "&ordseq=" + queryList[4] + "&tmonth="+queryList[5],
             parser: "getReportContent"
         };
     } else if (queryList[0] == "cummulative") {

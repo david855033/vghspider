@@ -9,7 +9,7 @@ module.exports = {
                 console.log('generate patient from raw data: ' + current);
                 var patientRawDataPath = gs.rawDataDir + "\\" + current;
                 var patientDataPath = gs.patientDataDir + "\\" + current +"_"+new Date().yyyymmddhhmmss()+ '.json';
-                var newPatient = {};
+                var newPatient = {hisID:current};
                 var files = fs.readdirSync(patientRawDataPath).filter(x => x.match(/\.json$/));
 
                 files.forEach(file => {
@@ -81,7 +81,9 @@ module.exports = {
                     } else if (dataType == "order") {
                         newPatient[dataType] = content;
                     } else if (dataType == "report") {
-                        newPatient[dataType] = content;
+                        newPatient[dataType] =  newPatient[dataType]||[];
+                        content.year=splitted[1];
+                        newPatient[dataType].push(content);
                     } else if (dataType == "reportContent") {
                         newPatient[dataType] || (newPatient[dataType] = []);
                         var container = newPatient[dataType].filter(x => x.caseno == splitted[2]);

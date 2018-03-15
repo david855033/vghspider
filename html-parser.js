@@ -279,10 +279,10 @@ module.exports.getReport = function (htmlText) {
         a = a[0];
         var href = a.getAttribute('href');
         if (!href) { continue };
-        result.partNo = href.selectToString(/partno=[0-9]*/g).replace('partno=', '');
-        result.patientID = href.selectToString(/histno=[0-9]*/g).replace('histno=', '');
-        result.caseNo = href.selectToString(/caseno=[0-9]*/g).replace('caseno=', '');
-        result.orderSeq = href.selectToString(/ordseq=[0-9]*/g).replace('ordseq=', '');
+        result.partNo = href.selectToString(/partno=\d*/g).replace('partno=', '');
+        result.patientID = href.selectToString(/histno=\D{0,1}\d*/g).replace('histno=', '');
+        result.caseNo = href.selectToString(/caseno=[\w\d]*/g).replace('caseno=', '');
+        result.orderSeq = href.selectToString(/ordseq=[\d]*/g).replace('ordseq=', '');
         result.item = a.textContent.trim();
         result.specimen = tds[1] && tds[1].textContent.trim();
         result.req = tds[2] && tds[2].textContent.trim();

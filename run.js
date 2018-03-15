@@ -37,9 +37,11 @@ hisIDList.forEach((element) => {
 Promise.resolve()
     .then(() => {
         var reduced = todoList.reduce((promise, current) => {
-            return promise.then(() => {
+            return promise
+            .then(() => {
                 return download([current]);
-            }).then(() => {
+            })
+            .then(() => {
                 return patient.createPatient([current]);
             })
         }, Promise.resolve())
