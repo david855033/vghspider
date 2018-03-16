@@ -11,6 +11,8 @@
             "name": "Launch Program",
             "console": "integratedTerminal",
             // "program": "${workspaceFolder}\\run.js",
+            // "program": "${workspaceFolder}\\etl\\etl.js",
+            // "program": "${workspaceFolder}\\etl\\etl2.js",
             "program": "${workspaceFolder}\\etl\\etl3.js",
         }
     ]

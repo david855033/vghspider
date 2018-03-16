@@ -1,26 +1,19 @@
 let fs = require('fs');
 let util = require('..//my-util.js');
 let _ = require('lodash');
-// let patientDir = "G:\\patient_data";
-// let workspaceDir = "G:\\workspace";
+let patientDir = "G:\\patient_data2"; let workspaceDir = "G:\\workspace";
 // let patientDir = "D:\\spider\\patient_data";
 // let workspaceDir = "D:\\spider\\workspace";
-let patientDir = "D:\\spider\\patient_data"; let workspaceDir = "D:\\spider\\workspace";
+// let patientDir = "D:\\spider\\patient_data"; let workspaceDir = "D:\\spider\\workspace";
 
-let years = [2013,2014,2015,2016,2017];
+let years = [2013, 2014, 2015, 2016, 2017];
 
-years = [2017];
+years = [2013];
 //抓取曾經住過BR83的人(section=nb)
 
 function FindReport(Patient, Condition, Parser) {
-    let findReport = [];
+    let findReport = Patient.report.array||[];
 
-    Patient.report.forEach(reportGroup => {
-        reportGroup.array.forEach(matchedReport => {
-            if (findReport.findIndex(x => x.caseNo == matchedReport.caseNo && x.orderSeq == matchedReport.orderSeq) < 0)
-                findReport.push(matchedReport)
-        })
-    })
     if (Condition.NameCondition) {
         findReport = findReport.filter(x => x.item.match(Condition.NameCondition));
     }
@@ -68,6 +61,7 @@ years.forEach(year => {
     let BR_TCBs = [];
     let resultStrings = [];
     resultStrings.push([
+        "hisID",
         "birth-date",
         "gender",
         "br-admission-date",
@@ -225,7 +219,7 @@ years.forEach(year => {
         var Bil_SMACNBR = FindReport(p, { NameCondition: /(bil-t)/i, caseno: nbrAdmissionCaseNo }, x => {
             var match = x.match(/T\.BILI(\s\D\s|\s+)\d+(.\d+)?\smg\/dl/i);
             let matchDate = x.match(/簽收時間： \d{8}/i);
-            if(!matchDate){
+            if (!matchDate) {
                 matchDate = x.match(/報告時間： \d{8}/i);
             }
             var value = "";
@@ -329,6 +323,7 @@ years.forEach(year => {
         }
 
         resultStrings.push([
+            p.hisID,
             p.patientData.birthDate,
             p.patientData.gender,
             brAdmissionDate,
