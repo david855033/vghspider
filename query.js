@@ -97,7 +97,7 @@ let getServerRequest = function (query) {
         };
     } else if (queryList[0] == "medication") {
         return {
-            url: "https://web9.vghtpe.gov.tw/emr/qemr/qemr.cfm?action=findUd&histno=" + queryList[1] + "&caseno=" + queryList[2] + "&dt=0&type=I&dept=0&dt1=0",
+            url: "https://web9.vghtpe.gov.tw/emr/qemr/qemr.cfm?action=findUd&histno=" + queryList[1] + "&caseno=" + queryList[2] + "&dt=0&type=I&dept=0&dt1="+queryList[3]||0,
             parser: "getMedication"
         };
     } else if (queryList[0] == "medicationInfo") {

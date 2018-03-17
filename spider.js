@@ -17,6 +17,7 @@ module.exports = {
                     passResult.admissionList = passResult.saved.array;
                     return new Promise((resolve) => { resolve(passResult) });
                 })
+                /*
                 //基本資料
                 .then((passResult) => {
                     return FetchWriteAsync("patientData" + "_" + hisID, hisID, passResult)
@@ -127,11 +128,11 @@ module.exports = {
                     }, Promise.resolve(passResult));
                     return reduced;
                 })
-
+                */
                 .then((passResult) => {
                     var admissionList = passResult.admissionList || [];
                     var reduced = admissionList.reduce((promise, current) => {
-                        var query = "medication" + "_" + hisID + "_" + current.caseNo;
+                        var query = "medication" + "_" + hisID + "_" + current.caseNo+"_"+current.dischargeDate.replace(/-/g,'').trim();
                         return promise.then((passResult) => {
                             return FetchWriteAsync(query, hisID, passResult);
                         }).then((passResult) => {
