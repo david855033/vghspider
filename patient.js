@@ -93,6 +93,9 @@ module.exports = {
                             container = { caseno: splitted[2], array: [] };
                             newPatient[dataType].push(container);
                         }
+                        content.caseNo=splitted[2];
+                        content.orderSeq=splitted[3];
+                        content.year=splitted[4];
                         container.array.push(content);
                     } else if (dataType == "transfusion"||dataType == "treatment") {
                         newPatient[dataType] || (newPatient[dataType] = []);
