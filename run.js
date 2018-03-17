@@ -32,7 +32,7 @@ hisIDList.forEach((element) => {
     }
 });
 
-todoList=[39676603]; //test
+// todoList=[39676603]; //test
 //-----download & parse
 Promise.resolve()
     .then(() => {

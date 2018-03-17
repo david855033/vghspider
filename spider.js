@@ -17,7 +17,6 @@ module.exports = {
                     passResult.admissionList = passResult.saved.array;
                     return new Promise((resolve) => { resolve(passResult) });
                 })
-                /*
                 //基本資料
                 .then((passResult) => {
                     return FetchWriteAsync("patientData" + "_" + hisID, hisID, passResult)
@@ -128,7 +127,6 @@ module.exports = {
                     }, Promise.resolve(passResult));
                     return reduced;
                 })
-                */
                 .then((passResult) => {
                     var admissionList = passResult.admissionList || [];
                     var reduced = admissionList.reduce((promise, current) => {
