@@ -1,24 +1,25 @@
 let fs = require('fs');
 let util = require('..//my-util.js');
 let _ = require('lodash');
-let patientDir = "G:\\patient_data2"; let workspaceDir = "G:\\workspace";
+let patientDir = "G:\\patient_data4"; let workspaceDir = "G:\\workspace";
 // let patientDir = "D:\\spider\\patient_data";
 // let workspaceDir = "D:\\spider\\workspace";
 // let patientDir = "D:\\spider\\patient_data"; let workspaceDir = "D:\\spider\\workspace";
 
 let years = [2013, 2014, 2015, 2016, 2017];
 
-years = [2013];
+// years = [2017];
 //抓取曾經住過BR83的人(section=nb)
-
+fs.writeFileSync(workspaceDir + "\\patient-data-set-nb-structure-all.csv", "");
 function FindReport(Patient, Condition, Parser) {
-    let findReport = Patient.report.array||[];
+    let findReport = [];
+    Patient.report.forEach(x => x.array.forEach(y => findReport.push(y)));
 
-    if (Condition.NameCondition) {
-        findReport = findReport.filter(x => x.item.match(Condition.NameCondition));
+    if (Condition.name) {
+        findReport = findReport.filter(x => x.item.match(Condition.name));
     }
-    if (Condition.SpecimenCondition) {
-        findReport = findReport.filter(x => x.specimen.match(Condition.SpecimenCondition));
+    if (Condition.specimen) {
+        findReport = findReport.filter(x => x.specimen.match(Condition.specimen));
     }
     if (Condition.caseno) {
         findReport = findReport.filter(x => x.caseNo == Condition.caseno);
@@ -27,7 +28,7 @@ function FindReport(Patient, Condition, Parser) {
     findReport.forEach(report => {
         var admissionReportGroup = Patient.reportContent.find(x => x.caseno == report.caseNo);
         if (admissionReportGroup) {
-            var matchContent = admissionReportGroup.array.find(x => x.ordseq == report.orderSeq);
+            var matchContent = admissionReportGroup.array.find(x => x.orderSeq == report.orderSeq);
             if (matchContent) {
                 report.contentRaw = matchContent.value;
                 if (Parser) {
@@ -40,6 +41,9 @@ function FindReport(Patient, Condition, Parser) {
 }
 
 function FindMedication(Patient, Condition, Parser) {
+    if(Patient.hisID=="39676818"){
+        console.log('stop');
+    }
     let findMedication = [];
     if (Condition.caseno) {
         var array = Patient.medication.find(x => x.caseno == Condition.caseno).array || [];
@@ -53,12 +57,10 @@ function FindMedication(Patient, Condition, Parser) {
     return findMedication;
 }
 
-
+let BR_TCBs = [];
 years.forEach(year => {
     let patientSet = JSON.parse(fs.readFileSync(workspaceDir + "\\patient-data-set-br83-" + year + ".json", "utf8"));
     console.log("birth year = " + year + ", patient count = " + patientSet.length);
-
-    let BR_TCBs = [];
     let resultStrings = [];
     resultStrings.push([
         "hisID",
@@ -72,7 +74,9 @@ years.forEach(year => {
         "lastBrTCBAge",
         "admissionDiagnosis",
         "admissionForJaundice",
+        'admissionForSepsis',
         "firstWBC",
+        "firstBand",
         "firstCRP",
         'firstBloodCulture',
         "maxBilNBR",
@@ -98,6 +102,10 @@ years.forEach(year => {
 
         var bbw = p.vitalSign.find(x => x.type == "HWS").data
             .filter(x => util.getDateDifference(x[0].split(' ')[0], p.patientData.birthDate) <= 1)
+            .filter(x => {
+                var match = x[2].match(/\d+(.\d+)?/);
+                return match&&(match[0] <= 5)
+            })
             .sort((a, b) => a[0] > b[0])
             .map(x => x[2].match(/\d+(.\d+)?/)[0])
             .filter(x => x != 0);
@@ -113,8 +121,9 @@ years.forEach(year => {
             }
         }
         var admissionForJaundice = (admissionDiagnosis || "").match(/(jaund|hyperbili)/i) ? 1 : "";
+        var admissionForSepsis = (admissionDiagnosis || "").match(/(sepsis|infect|septic|cellulitis|pneumonia|uti|meningitis|bacter|fever|bronchili|age|colitis)/i) ? 1 : "";
 
-        var tcbReport = FindReport(p, { NameCondition: /TCB/ }, x => {
+        var BrTcbReport = FindReport(p, { name: /TCB/, caseno: brCaseNo }, x => {
             let match = x.match(/\(\s*\d+(.\d+)?\s*\)/);
             let matchDate = x.match(/簽收時間： \d{8}/);
             if (match && matchDate) {
@@ -125,10 +134,9 @@ years.forEach(year => {
             }
             else { return {} };
         });
-        var brTCBReports = tcbReport.filter(x => x.caseNo == brCaseNo);
 
-        if (brTCBReports.length > 0) {
-            var sortedBrTCBReport = brTCBReports.sort((a, b) => a.content.date < b.content.date)
+        if (BrTcbReport.length > 0) {
+            var sortedBrTCBReport = BrTcbReport.sort((a, b) => a.content.date < b.content.date)
             var lastBrTCBReport = sortedBrTCBReport.shift();
             var lastBrTCB = lastBrTCBReport.content.tcb;
             var lastBrTCBAge = util.getDateDifference(lastBrTCBReport.content.date, p.patientData.birthDate);
@@ -143,26 +151,31 @@ years.forEach(year => {
             });
         }
 
-
-
-        var WBCReport = FindReport(p, { NameCondition: /(WBC|CBC)/ }, x => {
+        var WBCReport = FindReport(p, { name: /(WBC|CBC)/, caseno: nbrAdmissionCaseNo }, x => {
             let match = x.match(/WBC(\s\D\s|\s+)\d+\s*\/(cumm|ul)/i);
+            let matchBand = (x.match(/band.*?%/i)||[])[0]||"";
+            let band ="";
+            if(matchBand){
+                band=(matchBand.match(/\d+(\.\d+)?/i)||[])[0]||"";
+            }
             let matchDate = x.match(/簽收時間： \d{8}/i);
             if (match && matchDate) {
                 return {
                     wbc: match[0].replace(/(WBC(\s\D\s|\s+)|\s*\/(cumm|ul))/gi, '').trim(),
+                    band: band,
                     date: util.getDateFromShortDate(matchDate[0].match(/\d{8}/)[0])
                 }
             }
             else { return {} };
         });
-        WBCReport = WBCReport.filter(x => x.caseNo == nbrAdmissionCaseNo);
         var firstWBC = "";
+        var firstBand = "";
         if (WBCReport.length > 0) {
             var firstWBC = WBCReport.sort((a, b) => a.content.date > b.content.date)[0].content.wbc;
+            var firstBand = WBCReport.sort((a, b) => a.content.date > b.content.date)[0].content.band;
         }
 
-        var CRPReport = FindReport(p, { NameCondition: /CRP/ }, x => {
+        var CRPReport = FindReport(p, { name: /CRP/, caseno: nbrAdmissionCaseNo }, x => {
             let match = x.match(/CRP(\s\D\s|\s+)(>|<)?\s*\d+(.\d+)?\s*mg\/dl/i);
             let matchDate = x.match(/簽收時間： \d{8}/i);
             if (match && matchDate) {
@@ -173,13 +186,12 @@ years.forEach(year => {
             }
             else { return {} };
         });
-        CRPReport = CRPReport.filter(x => x.caseNo == nbrAdmissionCaseNo);
         var firstCRP = "";
         if (CRPReport.length > 0) {
             var firstCRP = CRPReport.sort((a, b) => a.content.date > b.content.date)[0].content.crp;
         }
 
-        var BloodCultureReport = FindReport(p, { NameCondition: /Blood\sculture/i }, x => {
+        var BloodCultureReport = FindReport(p, { name: /Blood\sculture/i, caseno: nbrAdmissionCaseNo }, x => {
             let match = x.match(/CFU\s+BOT[\s\S]*?抗生素名稱/i);
             let matchDate = x.match(/簽收時間： \d{8}/i);
             if (match && matchDate) {
@@ -196,13 +208,12 @@ years.forEach(year => {
             }
             else { return {} };
         });
-        BloodCultureReport = BloodCultureReport.filter(x => x.caseNo == nbrAdmissionCaseNo);
         var firstBloodCulture = "";
         if (BloodCultureReport.length > 0) {
             var firstBloodCulture = BloodCultureReport.sort((a, b) => a.content.date > b.content.date)[0].content.c;
         }
 
-        var BilMicroNBR = FindReport(p, { NameCondition: /(micro\sbili)/i, caseno: nbrAdmissionCaseNo }, x => {
+        var BilMicroNBR = FindReport(p, { name: /(micro\sbili)/i, caseno: nbrAdmissionCaseNo }, x => {
             var match = x.match(/\(\s\d+(\.\d+)?\s\)\smg\/dl/i);
             let matchDate = x.match(/簽收時間： \d{8}/i);
             var value = "";
@@ -216,7 +227,7 @@ years.forEach(year => {
                 return {}
             }
         });
-        var Bil_SMACNBR = FindReport(p, { NameCondition: /(bil-t)/i, caseno: nbrAdmissionCaseNo }, x => {
+        var Bil_SMACNBR = FindReport(p, { name: /(bil-t)/i, caseno: nbrAdmissionCaseNo }, x => {
             var match = x.match(/T\.BILI(\s\D\s|\s+)\d+(.\d+)?\smg\/dl/i);
             let matchDate = x.match(/簽收時間： \d{8}/i);
             if (!matchDate) {
@@ -238,7 +249,7 @@ years.forEach(year => {
         Bil_SMACNBR.forEach(x => maxBilNBR = Math.max(x.content.value, maxBilNBR));
         maxBilNBR = maxBilNBR ? maxBilNBR : "";
 
-        var UrineCultureReport = FindReport(p, { NameCondition: /ordinary\sculture/i, SpecimenCondition: /urine/i }, x => {
+        var UrineCultureReport = FindReport(p, { name: /ordinary\sculture/i, specimen: /urine/i, caseno: nbrAdmissionCaseNo }, x => {
             let match = x.match(/CFU\s+BOT[\s\S]*?抗生素名稱/i);
             let matchDate = x.match(/簽收時間： \d{8}/i);
             if (match && matchDate) {
@@ -255,13 +266,12 @@ years.forEach(year => {
             }
             else { return {} };
         });
-        UrineCultureReport = UrineCultureReport.filter(x => x.caseNo == nbrAdmissionCaseNo);
         var firstUrineCulture = "";
         if (UrineCultureReport.length > 0) {
             var firstUrineCulture = UrineCultureReport.sort((a, b) => a.content.date > b.content.date)[0].content.c;
         }
 
-        var UA_Report = FindReport(p, { NameCondition: /routine/i, SpecimenCondition: /urine/i }, x => {
+        var UA_Report = FindReport(p, { name: /routine/i, specimen: /urine/i, caseno: nbrAdmissionCaseNo }, x => {
             let matchWBC = x.match(/WBC\/PUS.*?\/hpf/i);
             let wbc = "";
             if (matchWBC) {
@@ -284,7 +294,6 @@ years.forEach(year => {
             }
             else { return {} };
         });
-        UA_Report = UA_Report.filter(x => x.caseNo == nbrAdmissionCaseNo);
         var firstUA_WBC = "";
         if (UA_Report.length > 0) {
             var firstUA_WBC = UA_Report.sort((a, b) => a.content.date > b.content.date)[0].content.wbc;
@@ -294,14 +303,14 @@ years.forEach(year => {
             var firstUA_comment = UA_Report.sort((a, b) => a.content.date > b.content.date)[0].content.comment;
         }
 
-        var HearingReport = FindReport(p, { NameCondition: /(HEARING)/ }, x => {
+        var HearingReport = FindReport(p, { name: /HEARING/i }, x => {
             let matchPASS = x.match(/\(\s?.{1,3}\s?\)\sPASS/i);
             let matchREFER1 = x.match(/\(\s?.{1,3}\s?\)\sREFER\sTO/gi);
             let matchREFER2 = x.match(/\(\s?.{1,3}\s?\)\sREFER\sRESULT/gi);
             let matchDate = x.match(/簽收時間： \d{8}/i);
             if (matchPASS && matchDate) {
                 return {
-                    value: matchPASS[0].match(/v/i) ? 'pass' : 'refer',
+                    value: matchPASS[0].match(/v/i) ? '1' : '0',
                     date: util.getDateFromShortDate(matchDate[0].match(/\d{8}/)[0])
                 }
             }
@@ -334,7 +343,9 @@ years.forEach(year => {
             lastBrTCBAge,
             admissionDiagnosis,
             admissionForJaundice,
+            admissionForSepsis,
             firstWBC,
+            firstBand,
             firstCRP,
             firstBloodCulture,
             maxBilNBR,
@@ -353,14 +364,37 @@ years.forEach(year => {
     ]);
     console.log(" ");
     fs.writeFileSync(workspaceDir + "\\patient-data-set-nb-structure-" + year + ".csv", msExcelBuffer);
+    fs.appendFileSync(workspaceDir + "\\patient-data-set-nb-structure-all.csv", msExcelBuffer);
 
-    resultStrings = ["age,tcb,admission"];
-    resultStrings = resultStrings.concat(BR_TCBs.map(x => x.age + "," + x.tcb + "," + x.admission));
-    var msExcelBufferTCBs = Buffer.concat([
-        new Buffer('\xEF\xBB\xBF', 'binary'),
-        new Buffer(resultStrings.join("\r\n"))
-    ]);
-
-    fs.writeFileSync(workspaceDir + "\\patient-data-set-nb-tcbs-" + year + ".csv", msExcelBufferTCBs);
 });
+
+var maxAge = _.max(BR_TCBs.map(x => x.age));
+var minAge = 0;
+var titleStrings = [];
+var resultStrings = [];
+var values = [];
+for (var i = 0; i <= maxAge; i++) {
+    var currentTcbs = BR_TCBs.filter(x => x.age == i);
+    titleStrings.push("age-" + i + "-nonAd-tcb");
+    values.push([]);
+    titleStrings.push("age-" + i + "-Ad-Jaundice-tcb");
+    values.push([]);
+}
+resultStrings.push(titleStrings.join(','));
+
+BR_TCBs.forEach(x => {
+    var position = (x.age) * 2 + x.admission;
+    values[position].push(x.tcb);
+})
+let maxRow = _.max(values.map(x => x.length));
+
+for (var i = 0; i < maxRow; i++) {
+    resultStrings.push(values.map(x => i < x.length ? x[i] : "").join(','));
+}
+
+var msExcelBufferTCBs = Buffer.concat([
+    new Buffer('\xEF\xBB\xBF', 'binary'),
+    new Buffer(resultStrings.join("\r\n"))
+]);
+fs.writeFileSync(workspaceDir + "\\patient-data-set-nb-tcbs.csv", msExcelBufferTCBs);
 

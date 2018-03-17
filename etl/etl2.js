@@ -1,7 +1,7 @@
 let fs = require('fs');
 let util = require('..//my-util.js');
 
-let patientDir = "G:\\patient_data2";  let workspaceDir = "G:\\workspace";
+let patientDir = "G:\\patient_data4";  let workspaceDir = "G:\\workspace";
 // let patientDir = "D:\\spider\\patient_data";
 // let workspaceDir = "D:\\spider\\workspace";
 // let patientDir = "D:\\spider\\patient_data"; let workspaceDir = "D:\\spider\\workspace";

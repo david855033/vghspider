@@ -1,7 +1,7 @@
 let fs = require('fs');
 let util = require('..//my-util.js');
 
-let patientDir = "G:\\patient_data2";  let workspaceDir = "G:\\workspace";
+let patientDir = "G:\\patient_data4"; let workspaceDir = "G:\\workspace";
 // let patientDir = "D:\\spider\\patient_data";
 // let workspaceDir = "D:\\spider\\workspace";
 // let patientDir = "D:\\spider\\patient_data"; let workspaceDir = "D:\\spider\\workspace";
@@ -32,12 +32,15 @@ console.log(">>write to single patient file by year to work space...");
 
 
 for (let i = 2012; i <= 2017; i++) {
-   let fileListOfYear = fileListByYear.filter(x=>x.birthyear == i)[0];
-   let patientDataSet = [];
-   fileListOfYear.array.forEach((file)=>{
+    let fileListOfYear = fileListByYear.filter(x => x.birthyear == i)[0];
+    let patientDataSet = [];
+    console.log('year: ' + i + ', n: '+ fileListOfYear.length);
+    fileListOfYear.array.forEach((file, i) => {
         let data = fs.readFileSync(patientDir + "\\" + file, "utf8");
         let patient = JSON.parse(data);
+        process.stdout.write('\r#' + i + ' file: ' + file + "");
         patientDataSet.push(patient);
-   });
-   fs.writeFileSync(workspaceDir+"\\patient-data-set-"+i+".json",JSON.stringify(patientDataSet));
+    });
+    console.log('');
+    fs.writeFileSync(workspaceDir + "\\patient-data-set-" + i + ".json", JSON.stringify(patientDataSet));
 }
