@@ -180,7 +180,7 @@ years.forEach(year => {
             let matchDate = x.match(/簽收時間： \d{8}/i);
             if (match && matchDate) {
                 return {
-                    crp: match[0].replace(/(CRP(\s\D\s|\s+)|mg\/dl)/gi, '').trim(),
+                    crp: match[0].replace(/(CRP(\s\D\s|\s+)|mg\/dl|<|>)/gi, '').trim(),
                     date: util.getDateFromShortDate(matchDate[0].match(/\d{8}/)[0])
                 }
             }
@@ -201,8 +201,10 @@ years.forEach(year => {
                 var c3 = match.match(/3\s.*?\/ml/i)[0].replace(/(^3)/i, '').replace(/(\/ml$)/i, '').trim();
                 var c = [];
                 c1 && c.push(c1); c2 && c.push(c2); c3 && c.push(c3);
+                c= c.join('-');
+                if(c.match(/no bacte/i)){c="neg"}
                 return {
-                    c: c.join('-'),
+                    c: c,
                     date: util.getDateFromShortDate(matchDate[0].match(/\d{8}/)[0])
                 }
             }
@@ -259,8 +261,11 @@ years.forEach(year => {
                 var c3 = match.match(/3\s.*?\/ml/i)[0].replace(/(^3)/i, '').replace(/(\/ml$)/i, '').trim();
                 var c = [];
                 c1 && c.push(c1); c2 && c.push(c2); c3 && c.push(c3);
+                c=c.join('-');
+                if(c.match(/\d+/)&&c.match(/\d+/)[0]<10000){c="neg";}
+                if(c.match(/(no bacte|Normal|contam|coag|bacill)/i)){c="neg";}
                 return {
-                    c: c.join('-'),
+                    c: c,
                     date: util.getDateFromShortDate(matchDate[0].match(/\d{8}/)[0])
                 }
             }
@@ -275,7 +280,7 @@ years.forEach(year => {
             let matchWBC = x.match(/WBC\/PUS.*?\/hpf/i);
             let wbc = "";
             if (matchWBC) {
-                wbc = matchWBC[0].replace(/(WBC\/PUS\s+:|\/hpf)/gi, '').trim().replace('-', '~');
+                wbc = matchWBC[0].replace(/(WBC\/PUS\s+:|\/hpf)/gi, '').trim().split('-')[0].trim();
             }
 
             let matchComment = x.match(/comment.*/i);
