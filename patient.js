@@ -10,7 +10,11 @@ module.exports = {
                 var patientRawDataPath = gs.rawDataDir + "\\" + current;
                 var patientDataPath = gs.patientDataDir + "\\" + current +"_"+new Date().yyyymmddhhmmss()+ '.json';
                 var newPatient = {hisID:current};
-                var files = fs.readdirSync(patientRawDataPath).filter(x => x.match(/\.json$/));
+                if(fs.existsSync(patientRawDataPath)){
+                    var files = fs.readdirSync(patientRawDataPath).filter(x => x.match(/\.json$/));
+                }else{
+                    var files = [];
+                }
 
                 files.forEach(file => {
                     var jsonFilePath = patientRawDataPath + "\\" + file;
@@ -109,7 +113,7 @@ module.exports = {
                     }
                 });
                 fs.writeFileSync(patientDataPath, JSON.stringify(newPatient));
-            })
+            });
         }, Promise.resolve());
     }
 }

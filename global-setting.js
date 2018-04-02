@@ -1,7 +1,7 @@
 let fs=require('fs');
 var commonDir = 'D:\\spiderdata'
 var rawDataDir=commonDir+"\\raw_data5";
-var patientDataDir=commonDir+"\\patient_data5";
+var patientDataDir=commonDir+"\\patient_data5_renew";
 var checkDir = function(dir){
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir);

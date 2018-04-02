@@ -38,9 +38,9 @@ Promise.resolve()
     .then(() => {
         var reduced = todoList.reduce((promise, current) => {
             return promise
-            .then(() => {
-                return download([current]);
-            })
+            // .then(() => {
+            //     return download([current]);
+            // })
             .then(() => {
                 return patient.createPatient([current]);
             })
